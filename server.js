@@ -1,4 +1,4 @@
-const crypto = require('crypto'); // 🟢 Fixes the MongoDB driver crypto reference error
+global.crypto = require('crypto'); // 🟢 Forces crypto globally so the MongoDB driver can find it
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
