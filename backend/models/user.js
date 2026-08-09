@@ -5,15 +5,12 @@ const userSchema = new mongoose.Schema({
     age: { type: Number },
     sex: { type: String },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true }, // Securely stores hashed password
     
-    isVerified: { type: Boolean, default: false },
-    otp: { type: String },
-    otpExpires: { type: Date },
-    
-    // 🟢 NEW: Stores the user's custom daily calorie goal
+    // User's custom daily calorie goal
     calorieGoal: { type: Number, default: 2500 }, 
     
+    // Meal tracker history
     meals: [{
         date: String, 
         category: String,
