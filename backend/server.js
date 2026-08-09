@@ -3,10 +3,11 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); 
+const bcrypt = require('bcryptjs'); 
 const User = require('./models/User'); 
 
 const app = express();
-app.use(cors({ origin: '*' })); // Allows requests from your Vercel frontend
+app.use(cors({ origin: '*' })); // Allows your Vercel frontend to talk to this backend
 app.use(express.json()); 
 
 // ==========================================
@@ -17,30 +18,55 @@ mongoose.connect(process.env.MONGO_URI)
     .catch((error) => console.error('❌ FAILED:', error));
 
 // ==========================================
-// 1. USER SYNC (No Login/Password)
+// 1. REGISTRATION (No OTP, saves password securely)
 // ==========================================
-app.post('/api/user', async (req, res) => {
+app.post('/api/register', async (req, res) => {
     try {
-        const { name, age, sex, email } = req.body;
-        if (!email) return res.status(400).json({ error: "Email is required." });
+        const { name, age, sex, email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
 
-        let user = await User.findOne({ email });
-        if (user) {
-            user.name = name || user.name;
-            user.age = age || user.age;
-            user.sex = sex || user.sex;
-        } else {
-            user = new User({ name, age, sex, email, meals: [], calorieGoal: 2500 });
-        }
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ error: "Email already registered." });
+
+        // Hash the password securely
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Save new user
+        const user = new User({ name, age, sex, email, password: hashedPassword, meals: [], calorieGoal: 2500 });
         await user.save();
-        res.status(200).json({ message: "User synced successfully!", user });
+        
+        res.status(200).json({ message: "Registration successful!" });
     } catch (error) { 
-        res.status(500).json({ error: "Failed to sync user." }); 
+        res.status(500).json({ error: "Server error during registration." }); 
     }
 });
 
 // ==========================================
-// 2. SETTINGS & PROFILE
+// 2. LOGIN (Checks password)
+// ==========================================
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
+
+        // Find user
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ error: "Incorrect email or password." });
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ error: "Incorrect email or password." });
+
+        // Success!
+        res.status(200).json({ message: "Login successful!" });
+    } catch (error) { 
+        res.status(500).json({ error: "Server error during login." }); 
+    }
+});
+
+// ==========================================
+// 3. SETTINGS & PROFILE
 // ==========================================
 app.put('/api/goal', async (req, res) => {
     try {
@@ -62,7 +88,7 @@ app.get('/api/profile', async (req, res) => {
 });
 
 // ==========================================
-// 3. MEAL TRACKING
+// 4. MEAL TRACKING
 // ==========================================
 app.post('/api/meals', async (req, res) => {
     try {
