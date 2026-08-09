@@ -17,19 +17,15 @@ app.use(express.static('public'));
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==========================================
-// EMAIL SERVER SETUP (Direct IPv4 Hardcoded Configuration)
+// EMAIL SERVER SETUP (Configured for Brevo SMTP)
 // ==========================================
 const transporter = nodemailer.createTransport({
-    host: '142.250.185.108', // Google's direct IPv4 SMTP address to bypass cloud routing issues
-    port: 465,
-    secure: true, 
-    tls: {
-        rejectUnauthorized: false,
-        servername: 'smtp.gmail.com' // Ensures valid SSL handshaking
-    },
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false, // Brevo uses TLS on port 587
     auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
+        user: process.env.GMAIL_USER, // Your Brevo SMTP login email
+        pass: process.env.GMAIL_PASS  // Your Brevo SMTP master key
     }
 });
 
@@ -73,7 +69,7 @@ app.post('/api/register', async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: "OTP sent!", requireOTP: true });
     } catch (error) { 
-        console.error("GMAIL ERROR DETAIL:", error); 
+        console.error("BREVO ERROR DETAIL:", error); 
         res.status(500).json({ error: error.message || "Registration failed." }); 
     }
 });
