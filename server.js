@@ -1,4 +1,4 @@
-require('dotenv').config(); // 🟢 NEW: Loads your hidden secrets from the .env file
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); 
@@ -11,26 +11,27 @@ const app = express();
 app.use(cors());
 app.use(express.json()); 
 
-// 🟢 NEW: Serve your frontend files automatically from the "public" folder
 app.use(express.static('public')); 
 
-const JWT_SECRET = process.env.JWT_SECRET; // 🟢 Hidden!
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==========================================
-// EMAIL SERVER SETUP
+// EMAIL SERVER SETUP (Updated for Cloud Reliability)
 // ==========================================
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Uses SSL to bypass cloud blocks
     auth: {
-        user: process.env.GMAIL_USER, // 🟢 Hidden!
-        pass: process.env.GMAIL_PASS  // 🟢 Hidden!
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS
     }
 });
 
 // ==========================================
 // DATABASE CONNECTION
 // ==========================================
-mongoose.connect(process.env.MONGO_URI) // 🟢 Hidden!
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ SUCCESS: Connected to MongoDB!'))
     .catch((error) => console.error('❌ FAILED:', error));
 
@@ -59,12 +60,17 @@ app.post('/api/register', async (req, res) => {
         
         const mailOptions = {
             from: `Calorie Mate <${process.env.GMAIL_USER}>`,
-            to: email, subject: 'Your Calorie Mate Verification Code',
+            to: email, 
+            subject: 'Your Calorie Mate Verification Code',
             text: `Hello ${name}!\n\nYour 6-digit verification code is: ${otp}`
         };
+        
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: "OTP sent!", requireOTP: true });
-    } catch (error) { res.status(500).json({ error: "Registration failed." }); }
+    } catch (error) { 
+        console.error("GMAIL ERROR DETAIL:", error); // 🟢 Exposes exact error to Railway logs if it fails
+        res.status(500).json({ error: error.message || "Registration failed." }); 
+    }
 });
 
 app.post('/api/verify-otp', async (req, res) => {
@@ -189,6 +195,5 @@ app.delete('/api/meals/:mealId', async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Failed to delete meal." }); }
 });
 
-// 🟢 NEW: Use environment port for deployment
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server listening on port ${PORT}`));
