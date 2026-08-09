@@ -1,4 +1,4 @@
-global.crypto = require('crypto'); // 🟢 Forces crypto globally so the MongoDB driver can find it
+global.crypto = require('crypto'); // Forces crypto globally so the MongoDB driver can find it
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -17,12 +17,13 @@ app.use(express.static('public'));
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==========================================
-// EMAIL SERVER SETUP (Updated for Cloud Reliability)
+// EMAIL SERVER SETUP (Updated with IPv4 family to fix cloud routing)
 // ==========================================
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // Uses SSL to bypass cloud blocks
+    secure: true, // Uses SSL
+    family: 4,    // 🟢 Forces IPv4 to bypass cloud host IPv6 routing errors
     auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASS
