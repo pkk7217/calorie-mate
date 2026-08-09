@@ -17,13 +17,16 @@ app.use(express.static('public'));
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==========================================
-// EMAIL SERVER SETUP (Updated with IPv4 family to fix cloud routing)
+// EMAIL SERVER SETUP (Direct IPv4 Hardcoded Configuration)
 // ==========================================
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: '142.250.185.108', // Google's direct IPv4 SMTP address to bypass cloud routing issues
     port: 465,
-    secure: true, // Uses SSL
-    family: 4,    // 🟢 Forces IPv4 to bypass cloud host IPv6 routing errors
+    secure: true, 
+    tls: {
+        rejectUnauthorized: false,
+        servername: 'smtp.gmail.com' // Ensures valid SSL handshaking
+    },
     auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASS
