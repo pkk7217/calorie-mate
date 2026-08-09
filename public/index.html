@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Mate - Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-[#0B1120] text-slate-200 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="text-center mb-8 relative z-10">
+            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                <i class="fa-solid fa-leaf text-2xl text-emerald-400"></i>
+            </div>
+            <h1 id="header-title" class="text-3xl font-extrabold text-white tracking-tight">Welcome Back</h1>
+            <p id="header-subtitle" class="text-slate-400 mt-2 text-sm">Sign in to Calorie Mate to continue.</p>
+        </div>
+
+        <div id="error-message" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm text-center font-medium relative z-10"></div>
+        <div id="success-message" class="hidden mb-4 p-3 bg-emerald-500/10 border border-emerald-500/50 rounded-xl text-emerald-400 text-sm text-center font-medium relative z-10"></div>
+
+        <!-- 1. SIGN IN VIEW -->
+        <div id="login-view" class="relative z-10">
+            <form onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Email</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-500"></i>
+                        <input type="email" id="login-email" class="w-full pl-11 pr-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-500"></i>
+                        <input type="password" id="login-password" class="w-full pl-11 pr-12 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                        <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')" class="absolute right-4 top-3.5 text-slate-500 hover:text-emerald-400 focus:outline-none"><i class="fa-solid fa-eye" id="login-eye-icon"></i></button>
+                    </div>
+                    <div class="text-right mt-2">
+                        <button type="button" onclick="switchView('forgot')" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">Forgot Password?</button>
+                    </div>
+                </div>
+                <button type="submit" id="login-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all">Sign In</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button onclick="switchView('register')" class="text-sm text-emerald-400 hover:text-emerald-300 font-medium">Don't have an account? Sign up</button>
+            </div>
+        </div>
+
+        <!-- 2. SIGN UP VIEW -->
+        <div id="register-view" class="hidden relative z-10">
+            <form onsubmit="handleRegister(event)" class="space-y-4">
+                <div><label class="block text-sm font-semibold text-slate-300 mb-1">Full Name</label><input type="text" id="reg-name" class="w-full px-4 py-2.5 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm font-semibold text-slate-300 mb-1">Age</label><input type="number" id="reg-age" class="w-full px-4 py-2.5 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required min="10" max="120"></div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-1">Sex</label>
+                        <select id="reg-sex" class="w-full px-4 py-2.5 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required><option value="" disabled selected>Select</option><option value="Male">Male</option><option value="Female">Female</option></select>
+                    </div>
+                </div>
+                <div><label class="block text-sm font-semibold text-slate-300 mb-1">Email</label><input type="email" id="reg-email" class="w-full px-4 py-2.5 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required></div>
+                <div><label class="block text-sm font-semibold text-slate-300 mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="reg-password" class="w-full pr-12 pl-4 py-2.5 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required minlength="6">
+                        <button type="button" onclick="togglePasswordVisibility('reg-password', 'reg-eye-icon')" class="absolute right-4 top-3 text-slate-500 hover:text-emerald-400 focus:outline-none"><i class="fa-solid fa-eye" id="reg-eye-icon"></i></button>
+                    </div>
+                </div>
+                <button type="submit" id="reg-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all mt-2">Create Account</button>
+            </form>
+            <div class="mt-4 text-center">
+                <button onclick="switchView('login')" class="text-sm text-slate-400 hover:text-white font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to login</button>
+            </div>
+        </div>
+
+        <!-- 3. VERIFY OTP VIEW -->
+        <div id="otp-view" class="hidden relative z-10">
+            <form onsubmit="handleOTPVerify(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2 text-center">Enter 6-Digit Code</label>
+                    <input type="text" id="otp-code" maxlength="6" class="w-full px-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-center tracking-[0.5em] font-mono text-xl" required>
+                </div>
+                <button type="submit" id="verify-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all">Verify Account</button>
+            </form>
+            <div class="mt-4 text-center"><button onclick="switchView('login')" class="text-sm text-slate-400 hover:text-white font-medium">Cancel</button></div>
+        </div>
+
+        <!-- 4. FORGOT PASSWORD VIEW -->
+        <div id="forgot-view" class="hidden relative z-10">
+            <form onsubmit="handleForgotPassword(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Account Email</label>
+                    <input type="email" id="forgot-email" class="w-full px-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                </div>
+                <button type="submit" id="forgot-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all">Send Reset Code</button>
+            </form>
+            <div class="mt-4 text-center"><button onclick="switchView('login')" class="text-sm text-slate-400 hover:text-white font-medium">Cancel</button></div>
+        </div>
+
+        <!-- 5. RESET PASSWORD VIEW -->
+        <div id="reset-view" class="hidden relative z-10">
+            <form onsubmit="handleResetPassword(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">6-Digit Code</label>
+                    <input type="text" id="reset-otp" maxlength="6" class="w-full px-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-center tracking-[0.5em] font-mono text-xl" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">New Password</label>
+                    <div class="relative">
+                        <input type="password" id="reset-new-password" class="w-full pr-12 pl-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" required minlength="6">
+                        <button type="button" onclick="togglePasswordVisibility('reset-new-password', 'reset-eye-icon')" class="absolute right-4 top-3.5 text-slate-500 hover:text-emerald-400 focus:outline-none"><i class="fa-solid fa-eye" id="reset-eye-icon"></i></button>
+                    </div>
+                </div>
+                <button type="submit" id="reset-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all">Change Password</button>
+            </form>
+            <div class="mt-4 text-center"><button onclick="switchView('login')" class="text-sm text-slate-400 hover:text-white font-medium">Cancel</button></div>
+        </div>
+    </div>
+
+    <script>
+        let pendingEmail = "";
+
+        function togglePasswordVisibility(id, iconId) {
+            const el = document.getElementById(id), icon = document.getElementById(iconId);
+            if (el.type === 'password') { el.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+            else { el.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        }
+
+        function showError(msg) {
+            const box = document.getElementById('error-message');
+            box.innerText = msg; box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('hidden'), 5000);
+        }
+        function showSuccess(msg) {
+            const box = document.getElementById('success-message');
+            box.innerText = msg; box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('hidden'), 5000);
+        }
+
+        function switchView(view) {
+            ['login-view', 'register-view', 'otp-view', 'forgot-view', 'reset-view', 'error-message', 'success-message'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+            
+            const titles = {
+                login: ["Welcome Back", "Sign in to Calorie Mate to continue."],
+                register: ["Create Account", "Start tracking your nutrition today."],
+                otp: ["Check Your Email", `We sent a code to ${pendingEmail}`],
+                forgot: ["Reset Password", "Enter your email to receive a recovery code."],
+                reset: ["New Password", `Enter the code sent to ${pendingEmail}`]
+            };
+            document.getElementById('header-title').innerText = titles[view][0];
+            document.getElementById('header-subtitle').innerText = titles[view][1];
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn'); btn.disabled = true; btn.innerText = "Checking...";
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                localStorage.setItem('calorie_mate_token', data.token);
+                window.location.href = "dashboard.html";
+            } catch (err) { showError(err.message); btn.disabled = false; btn.innerText = "Sign In"; }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('reg-btn'); btn.disabled = true; btn.innerText = "Sending OTP...";
+            pendingEmail = document.getElementById('reg-email').value;
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        name: document.getElementById('reg-name').value, age: document.getElementById('reg-age').value,
+                        sex: document.getElementById('reg-sex').value, email: pendingEmail, password: document.getElementById('reg-password').value 
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                switchView('otp');
+            } catch (err) { showError(err.message); btn.disabled = false; btn.innerText = "Create Account"; }
+        }
+
+        async function handleOTPVerify(e) {
+            e.preventDefault();
+            const btn = document.getElementById('verify-btn'); btn.disabled = true; btn.innerText = "Verifying...";
+            try {
+                const response = await fetch('/api/verify-otp', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingEmail, otp: document.getElementById('otp-code').value })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                localStorage.setItem('calorie_mate_token', data.token);
+                window.location.href = "dashboard.html";
+            } catch (err) { showError(err.message); btn.disabled = false; btn.innerText = "Verify Account"; }
+        }
+
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const btn = document.getElementById('forgot-btn'); btn.disabled = true; btn.innerText = "Sending...";
+            pendingEmail = document.getElementById('forgot-email').value;
+            try {
+                const response = await fetch('/api/forgot-password', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingEmail })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                switchView('reset');
+            } catch (err) { showError(err.message); } finally { btn.disabled = false; btn.innerText = "Send Reset Code"; }
+        }
+
+        async function handleResetPassword(e) {
+            e.preventDefault();
+            const btn = document.getElementById('reset-btn'); btn.disabled = true; btn.innerText = "Updating...";
+            try {
+                const response = await fetch('/api/reset-password', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingEmail, otp: document.getElementById('reset-otp').value, newPassword: document.getElementById('reset-new-password').value })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                showSuccess("Password changed successfully! You can now log in.");
+                document.getElementById('login-email').value = pendingEmail;
+                switchView('login');
+            } catch (err) { showError(err.message); btn.disabled = false; btn.innerText = "Change Password"; }
+        }
+    </script>
+</body>
+</html>
