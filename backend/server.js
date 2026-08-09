@@ -1,4 +1,4 @@
-global.crypto = require('crypto'); // Forces crypto globally so the MongoDB driver can find it
+global.crypto = require('crypto');
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -6,10 +6,8 @@ const cors = require('cors');
 const User = require('./models/User'); 
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*' })); // Allows requests from your Vercel frontend
 app.use(express.json()); 
-
-app.use(express.static('public')); 
 
 // ==========================================
 // DATABASE CONNECTION
@@ -19,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
     .catch((error) => console.error('❌ FAILED:', error));
 
 // ==========================================
-// 1. SIMPLIFIED USER DATA SYNC (No Login/OTP)
+// 1. USER SYNC (No Login/Password)
 // ==========================================
 app.post('/api/user', async (req, res) => {
     try {
@@ -61,15 +59,6 @@ app.get('/api/profile', async (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found." });
         res.status(200).json({ name: user.name, age: user.age, sex: user.sex, calorieGoal: user.calorieGoal || 2500 });
     } catch (error) { res.status(500).json({ error: "Failed to fetch profile." }); }
-});
-
-app.put('/api/profile', async (req, res) => {
-    try {
-        const { email, name, age, sex } = req.body;
-        if (!email) return res.status(400).json({ error: "Email is required." });
-        await User.findOneAndUpdate({ email }, { name, age, sex });
-        res.status(200).json({ message: "Profile updated successfully!" });
-    } catch (error) { res.status(500).json({ error: "Failed to update profile." }); }
 });
 
 // ==========================================
