@@ -1,3 +1,4 @@
+const crypto = require('crypto'); // 🟢 Fixes the MongoDB driver crypto reference error
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -68,7 +69,7 @@ app.post('/api/register', async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: "OTP sent!", requireOTP: true });
     } catch (error) { 
-        console.error("GMAIL ERROR DETAIL:", error); // 🟢 Exposes exact error to Railway logs if it fails
+        console.error("GMAIL ERROR DETAIL:", error); 
         res.status(500).json({ error: error.message || "Registration failed." }); 
     }
 });
